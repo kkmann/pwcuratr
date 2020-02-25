@@ -1,6 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 
-^binder$
+^runtime.txt
 ^\.DS_Store$
 ^\.git$
