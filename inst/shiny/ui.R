@@ -76,7 +76,7 @@ ui <- navbarPage("Pathway Cluster Curation Tool",
                 hr(),
                 uiOutput("pathwayName"),
                 downloadButton("download",
-                    label = "Download pathway cluster"
+                    label = "download pathway cluster"
                 )
             ),
             mainPanel(

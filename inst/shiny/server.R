@@ -31,8 +31,7 @@ server <- function(input, output) {
                 Name    = external_gene_name
             ),
         options = list(
-            lengthMenu = c(5, 15, 50, 10000),
-            pageLength = 10000
+            paging = FALSE
         ),
         escape   = FALSE,
         rownames = FALSE
@@ -84,8 +83,7 @@ server <- function(input, output) {
             pull(ensembl_gene_id)
         new_data <- tibble(
                 external_gene_name = str_extract(input$selectGene, "^.+(?= \\()"),
-                ensembl_gene_id    = str_extract(input$selectGene, "(?<=^.{1,99} \\()[[:alnum:]]+(?=\\)$)"),
-                selected           = TRUE
+                ensembl_gene_id    = str_extract(input$selectGene, "(?<=^.{1,99} \\()[[:alnum:]]+(?=\\)$)")
             )
         seed_genes_selected_new <- new_data$ensembl_gene_id
         tbls$seed_genes <- bind_rows(
@@ -163,11 +161,16 @@ server <- function(input, output) {
                             paste(collapse = ", ")
                     }
                 )
+            ) %>%
+            rename(
+                `Reactome ID` = pathway,
+                Description   = description,
+                `contained seed genes` = seed_genes,
+                `total number of genes` = n_genes
             )
         },
         options = list(
-            lengthMenu = c(5, 15, 50, 10000),
-            pageLength = 10000
+            paging = FALSE
         ),
         escape   = FALSE,
         rownames = FALSE
@@ -214,9 +217,9 @@ server <- function(input, output) {
                         pwcuratr_tbls$ensembl2pathways,
                         reactome_pathway_id == .,
                     ) %>%
-                        select(reactome_pathway_id, ensembl_id) %>%
-                        distinct() %>%
-                        nrow()
+                    select(reactome_pathway_id, ensembl_id) %>%
+                    distinct() %>%
+                    nrow()
                 )
             ) %>%
             arrange(n_genes)
@@ -243,7 +246,7 @@ server <- function(input, output) {
                         unique %>%
                         length() %>%
                         as.character(),
-                    `seed genes selected` = pwcuratr_tbls$ensemble %>%
+                    `seed genes covered` = pwcuratr_tbls$ensemble %>%
                         select(ensembl_gene_id, external_gene_name) %>%
                         filter(ensembl_gene_id %in% unlist(seed_genes)) %>%
                         distinct() %>%
@@ -251,10 +254,10 @@ server <- function(input, output) {
                         unique() %>%
                         sort() %>%
                         paste(collapse = ", "),
-                    `seed genes not selected` = pwcuratr_tbls$ensemble %>%
+                    `seed genes not covered` = pwcuratr_tbls$ensemble %>%
                         select(ensembl_gene_id, external_gene_name) %>%
                         filter(
-                            ensembl_gene_id %in% unlist(tbls$seed_genes$ensembl_gene_id),
+                            ensembl_gene_id %in% seed_genes(),
                             !(ensembl_gene_id %in% unlist(seed_genes))
                         ) %>%
                         distinct() %>%
@@ -376,10 +379,19 @@ server <- function(input, output) {
 
     output$component_selector <- renderUI({
         if (length(seed_genes()) == 0) return(NULL)
-        cdt_genes <- candidate_genes(
-            minscore        = input$minScore,
-            maxedgedistance = input$pruning_distance
-        )
+        if (tbls$pathways %>%
+            filter(
+                row_number() %in% input$tbl_candidate_pathways_rows_selected
+            ) %>%
+            pull(pathway) %>%
+            length() == 0) {
+            cdt_genes <- seed_genes()
+        } else {
+            cdt_genes <- candidate_genes(
+                minscore        = input$minScore,
+                maxedgedistance = input$pruning_distance
+            )
+        }
         n_components <- cdt_genes %>%
             as_igraph() %>%
             igraph::components() %>%
@@ -396,7 +408,7 @@ server <- function(input, output) {
         if (is.null(input$uploadPathwayZip$datapath[1])) {
             return(numericInput('pruning_distance',
                 label = 'k',
-                min = 0, max = NA, value = 2
+                min = 0, max = NA, value = 1
             ))
         } else {
             tdir <- tempdir()
@@ -416,7 +428,7 @@ server <- function(input, output) {
         if (is.null(input$uploadPathwayZip$datapath[1])) {
             return(numericInput('minScore',
                 label = 'min. score',
-                min = 0, max = 1, step = .01, value = .9
+                min = 0, max = 1, step = .01, value = .99
             ))
         } else {
             tdir <- tempdir()
