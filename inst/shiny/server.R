@@ -5,7 +5,7 @@ library(tidyverse)
 
 
 
-server <- function(input, output) {
+server <- function(input, output, session) {
 
     tbls <- reactiveValues()
 
@@ -18,6 +18,7 @@ server <- function(input, output) {
         external_gene_name = character(0L),
         ensembl_gene_id    = character(0L)
     )
+
     output$tblSeedGenes <- DT::renderDataTable(
         tbls$seed_genes %>%
             mutate(
@@ -34,9 +35,106 @@ server <- function(input, output) {
             paging = FALSE
         ),
         escape   = FALSE,
-        rownames = FALSE
+        rownames = FALSE,
+        server   = TRUE
     )
     tblSeedGenesProxy <- DT::dataTableProxy("tblSeedGenes")
+
+    tbls$pathways <- tibble(
+        pathway     = character(0L),
+        description = character(0L),
+        seed_genes  = list(),
+        n_genes     = integer(0L)
+    )
+    output$tbl_candidate_pathways <- DT::renderDataTable({
+        tbls$pathways %>%
+            mutate(
+                pathway = map_chr(
+                    pathway,
+                    ~glue('<a href=https://reactome.org/content/detail/{.} target="_blank">{.}</a>')
+                ),
+                seed_genes = map_chr(
+                    seed_genes,
+                    function(seed_genes) {
+                        pwcuratr_tbls$ensemble %>%
+                            select(ensembl_gene_id, external_gene_name) %>%
+                            filter(ensembl_gene_id %in% seed_genes) %>%
+                            distinct() %>%
+                            pull(external_gene_name) %>%
+                            paste(collapse = ", ")
+                    }
+                )
+            ) %>%
+            rename(
+                `Reactome ID` = pathway,
+                Description   = description,
+                `contained seed genes` = seed_genes,
+                `total number of genes` = n_genes
+            )
+        },
+        options = list(
+            paging = FALSE
+        ),
+        escape   = FALSE,
+        rownames = FALSE,
+        server   = TRUE
+    )
+    tblCandidatePathwaysProxy <- DT::dataTableProxy("tbl_candidate_pathways")
+
+    update_pathways <- function(sg) {
+        if (is.null(input$uploadPathwayZip$datapath[1])) {
+            pathways_selected_old_cache <- tbls$pathways %>%
+                filter(
+                    row_number() %in% input$tbl_candidate_pathways_rows_selected
+                ) %>%
+                pull(pathway)
+        } else {
+            tdir <- tempdir()
+            odir <- setwd(tdir)
+            unzip(input$uploadPathwayZip$datapath[1])
+            pathways_selected_old_cache <- read_csv(
+                "pathways.csv",
+                col_types = cols(
+                    pathway     = col_character(),
+                    description = col_character()
+                )
+            ) %>%
+                pull(pathway)
+            setwd(odir)
+        }
+        tbls$pathways <- tibble(
+            pathway = query_reactome_pathways(sg)
+        ) %>%
+            left_join(
+                pwcuratr_tbls$ensembl2pathways %>%
+                    select(reactome_pathway_id, description) %>%
+                    distinct(),
+                by = c(pathway = "reactome_pathway_id")
+            ) %>%
+            mutate(
+                seed_genes = map(
+                    pathway,
+                    ~sg[sg %in% query_participating_genes(.)]
+                ),
+                n_genes = map_int(
+                    pathway,
+                    ~filter(
+                        pwcuratr_tbls$ensembl2pathways,
+                        reactome_pathway_id == .,
+                    ) %>%
+                        select(reactome_pathway_id, ensembl_id) %>%
+                        distinct() %>%
+                        nrow()
+                )
+            ) %>%
+            arrange(n_genes)
+
+        tblCandidatePathwaysProxy %>%
+            DT::selectRows(
+                which(tbls$pathways$pathway %in% pathways_selected_old_cache)
+            )
+    }
+
     observeEvent(input$uploadSeedGenesFile, {
         seed_genes_selected_old <- tbls$seed_genes %>%
             filter(
@@ -111,7 +209,8 @@ server <- function(input, output) {
                 external_gene_name = col_character(),
                 ensembl_gene_id    = col_character()
             )
-        )
+        ) %>%
+        dplyr::distinct()
         setwd(odir)
         tblSeedGenesProxy %>%
             DT::selectRows(1:nrow(tbls$seed_genes))
@@ -137,99 +236,9 @@ server <- function(input, output) {
         colnames = FALSE
     )
 
-    tbls$pathways <- tibble(
-        pathway     = character(0L),
-        description = character(0L),
-        seed_genes  = list(),
-        n_genes     = integer(0L)
-    )
-    output$tbl_candidate_pathways <- DT::renderDataTable({
-        tbls$pathways %>%
-            mutate(
-                pathway = map_chr(
-                    pathway,
-                    ~glue('<a href=https://reactome.org/content/detail/{.} target="_blank">{.}</a>')
-                ),
-                seed_genes = map_chr(
-                    seed_genes,
-                    function(seed_genes) {
-                        pwcuratr_tbls$ensemble %>%
-                            select(ensembl_gene_id, external_gene_name) %>%
-                            filter(ensembl_gene_id %in% seed_genes) %>%
-                            distinct() %>%
-                            pull(external_gene_name) %>%
-                            paste(collapse = ", ")
-                    }
-                )
-            ) %>%
-            rename(
-                `Reactome ID` = pathway,
-                Description   = description,
-                `contained seed genes` = seed_genes,
-                `total number of genes` = n_genes
-            )
-        },
-        options = list(
-            paging = FALSE
-        ),
-        escape   = FALSE,
-        rownames = FALSE
-    )
-    tblCandidatePathwaysProxy <- DT::dataTableProxy("tbl_candidate_pathways")
-    update_pathways <- function() {
-        if (is.null(input$uploadPathwayZip$datapath[1])) {
-            pathways_selected_old_cache <- tbls$pathways %>%
-                filter(
-                    row_number() %in% input$tbl_candidate_pathways_rows_selected
-                ) %>%
-                pull(pathway)
-        } else {
-            tdir <- tempdir()
-            odir <- setwd(tdir)
-            unzip(input$uploadPathwayZip$datapath[1])
-            pathways_selected_old_cache <- read_csv(
-                "pathways.csv",
-                col_types = cols(
-                    pathway     = col_character(),
-                    description = col_character()
-                )
-            ) %>%
-                pull(pathway)
-            setwd(odir)
-        }
-        tbls$pathways <- tibble(
-                pathway = query_reactome_pathways(seed_genes())
-            ) %>%
-            left_join(
-                pwcuratr_tbls$ensembl2pathways %>%
-                    select(reactome_pathway_id, description) %>%
-                    distinct(),
-                by = c(pathway = "reactome_pathway_id")
-            ) %>%
-            mutate(
-                seed_genes = map(
-                    pathway,
-                    ~seed_genes()[seed_genes() %in% query_participating_genes(.)]
-                ),
-                n_genes = map_int(
-                    pathway,
-                    ~filter(
-                        pwcuratr_tbls$ensembl2pathways,
-                        reactome_pathway_id == .,
-                    ) %>%
-                    select(reactome_pathway_id, ensembl_id) %>%
-                    distinct() %>%
-                    nrow()
-                )
-            ) %>%
-            arrange(n_genes)
-
-        tblCandidatePathwaysProxy %>%
-            DT::selectRows(which(tbls$pathways$pathway %in% pathways_selected_old_cache))
-    }
     observeEvent(
         input$btn_updatePathwaySelection, {
-        update_pathways()
+        update_pathways(seed_genes())
     })
 
     output$tbl_candidate_pathway_summary <- renderTable({
@@ -295,13 +304,14 @@ server <- function(input, output) {
             pull(pathway) %>%
             query_participating_genes %>%
             prune(
-                seed_genes      = tbls$seed_genes$ensembl_gene_id,
+                seed_genes      = seed_genes(),
                 maxedgedistance = maxedgedistance,
                 minscore        = minscore
             )
     }
 
     output$plt_select_k <- renderPlot({
+        req(input$minScore, input$pruning_distance)
         if (length(input$tbl_candidate_pathways_rows_selected) == 0) return(NULL)
         p1 <- tibble(
             maxedgedistance = 0:10,
@@ -378,6 +388,7 @@ server <- function(input, output) {
     }, height = 150)
 
     output$component_selector <- renderUI({
+        req(input$minScore, input$pruning_distance)
         if (length(seed_genes()) == 0) return(NULL)
         if (tbls$pathways %>%
             filter(
@@ -464,6 +475,7 @@ server <- function(input, output) {
     })
 
     output$plt_pathway <- renderPlot({
+        req(input$minScore, input$pruning_distance)
         if (is.null(input$component_selector)) return(NULL)
         withProgress({
                 candidate_genes(

@@ -1,4 +1,4 @@
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/kkmann/pathway-curation-tool/master?urlpath=shiny/)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/kkmann/pwcuratr/master?urlpath=shiny/inst/shiny/)
 
 **tl;dr:** elicit candidate gene networks based on seed-genes.
 
@@ -15,7 +15,7 @@ downloaded from [https://reactome.org/download-data](https://reactome.org/downlo
 Internally all mappings are done via an [ENSEMBL](https://www.ensembl.org/index.html)
 version 97 snapshot downloaded using the [biomaRt](https://bioconductor.org/packages/release/bioc/html/biomaRt.html) package.
 
-The shiny app is hosted [here](https://mybinder.org/v2/gh/kkmann/pathway-curation-tool/master?urlpath=shiny/)
+The shiny app is hosted [here](https://mybinder.org/v2/gh/kkmann/pwcuratr/master?urlpath=shiny/inst/shiny/)
 using [binder.org](https://mybinder.org/).
 
 

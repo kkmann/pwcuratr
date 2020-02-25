@@ -2,11 +2,11 @@ library(shiny)
 library(pwcuratr)
 library(tidyverse)
 
-ui <- navbarPage("Pathway Cluster Curation Tool",
-    tabPanel("Info",
+ui <- navbarPage("Pathway Cluster Curation Tool", id = "navbarpage",
+    tabPanel("Info", value = "info_panel",
         withMathJax(includeMarkdown('markdown/info.md'))
     ),
-    tabPanel("Define Seed Genes",
+    tabPanel("Define Seed Genes", value = "seed_gene_panel",
         sidebarLayout(
             sidebarPanel(
                 fileInput('uploadPathwayZip', 'restore Pathway Cluster',
@@ -38,7 +38,7 @@ ui <- navbarPage("Pathway Cluster Curation Tool",
             )
         )
     ),
-    tabPanel("Select Pathways",
+    tabPanel("Select Pathways", value = "select_pathway_panel",
         sidebarLayout(
             sidebarPanel(
                 actionButton("btn_updatePathwaySelection",
