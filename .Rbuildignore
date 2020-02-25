@@ -1,6 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 
-^\.binder$
+^binder$
 ^\.DS_Store$
 ^\.git$
