@@ -173,8 +173,7 @@ server <- function(input, output) {
         rownames = FALSE
     )
     tblCandidatePathwaysProxy <- DT::dataTableProxy("tbl_candidate_pathways")
-    observeEvent(
-        input$btn_updatePathwaySelection, {
+    update_pathways <- function() {
         if (is.null(input$uploadPathwayZip$datapath[1])) {
             pathways_selected_old_cache <- tbls$pathways %>%
                 filter(
@@ -186,12 +185,12 @@ server <- function(input, output) {
             odir <- setwd(tdir)
             unzip(input$uploadPathwayZip$datapath[1])
             pathways_selected_old_cache <- read_csv(
-                    "pathways.csv",
-                    col_types = cols(
-                        pathway     = col_character(),
-                        description = col_character()
-                    )
-                ) %>%
+                "pathways.csv",
+                col_types = cols(
+                    pathway     = col_character(),
+                    description = col_character()
+                )
+            ) %>%
                 pull(pathway)
             setwd(odir)
         }
@@ -224,6 +223,10 @@ server <- function(input, output) {
 
         tblCandidatePathwaysProxy %>%
             DT::selectRows(which(tbls$pathways$pathway %in% pathways_selected_old_cache))
+    }
+    observeEvent(
+        input$btn_updatePathwaySelection, {
+        update_pathways()
     })
 
     output$tbl_candidate_pathway_summary <- renderTable({
@@ -429,6 +432,24 @@ server <- function(input, output) {
             ))
         }
     })
+    output$pathwayName <- renderUI({
+        if (is.null(input$uploadPathwayZip$datapath[1])) {
+            return(textInput("pwcName",
+                             "pathway name",
+                             value = "my_pathway_cluster",
+                             placeholder = "my_pathway_cluster"))
+        } else {
+            tdir <- tempdir()
+            odir <- setwd(tdir)
+            unzip(input$uploadPathwayZip$datapath[1])
+            name <- jsonlite::read_json(
+                "parameters.json"
+            )$name
+            setwd(odir)
+            return(textInput("pwcName", "pathway name", value = name,
+                             placeholder = "my_pathway_name"))
+        }
+    })
 
     output$plt_pathway <- renderPlot({
         if (is.null(input$component_selector)) return(NULL)
@@ -451,7 +472,7 @@ server <- function(input, output) {
     )
 
     output$download <- downloadHandler(
-        filename = function() "pathway_cluster.zip",
+        filename = function() glue("{input$pwcName}.zip"),
         content = function(file) {
             tdir <- dirname(file)
             tbls$seed_genes %>%
@@ -475,7 +496,8 @@ server <- function(input, output) {
                 write_rds(path = glue("{tdir}/igraph.rds"), compress = "gz")
             list(
                 minscore = input$minScore,
-                pruning_distance = input$pruning_distance
+                pruning_distance = input$pruning_distance,
+                name = input$pwcName
             ) %>%
             jsonlite::write_json(glue("{tdir}/parameters.json"))
             pth <- setwd(tdir)

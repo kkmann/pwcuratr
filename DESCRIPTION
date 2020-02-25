@@ -19,5 +19,8 @@ Imports:
     cowplot,
     httr,
     shiny,
-    igraph
+    igraph,
+    ggraph,
+    ggrepel,
+    DT
 VignetteBuilder: knitr
