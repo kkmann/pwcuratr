@@ -1,0 +1,23 @@
+Package: pwcuratr
+Type: Package
+Title: Functional Pathway Cluster Curation tool
+Version: 0.1.0
+Author: Kevin Kunzmann <kevin.kunzmann@mrc-bsu.cam.ac.uk>
+Maintainer: Kevin Kunzmann <kevin.kunzmann@mrc-bsu.cam.ac.uk>
+Description: Elicit candidate gene networks based on sets of seed genes using
+    biological functional gene-gene interactions.
+License: MIT + file
+Encoding: UTF-8
+LazyData: true
+Suggests: 
+    knitr,
+    rmarkdown
+Depends:
+    tidyverse
+Imports:
+    glue,
+    cowplot,
+    httr,
+    shiny,
+    igraph
+VignetteBuilder: knitr
