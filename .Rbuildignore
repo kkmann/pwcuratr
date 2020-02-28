@@ -4,3 +4,5 @@
 ^runtime.txt$
 ^\.DS_Store$
 ^\.git$
+^\.travis\.yml$
+^codecov\.yml$
