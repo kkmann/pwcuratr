@@ -12,11 +12,17 @@ LazyData: true
 Suggests: 
     knitr,
     rmarkdown,
+    pander,
     covr
 Depends:
-    tidyverse
+    tidyverse,
+    R >= 3.5.0
 Imports:
     glue,
+    scales,
+    tidygraph,
+    vroom,
+    readr,
     cowplot,
     httr,
     shiny,
