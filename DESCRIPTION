@@ -16,7 +16,7 @@ Suggests:
     covr
 Depends:
     tidyverse,
-    R >= 3.5.0
+    R (>= 3.5.0)
 Imports:
     glue,
     scales,
