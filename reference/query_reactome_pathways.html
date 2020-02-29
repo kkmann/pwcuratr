@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>A package to facilitate curation of functional gene networks — pwcuratr • pwcuratr</title>
+<title>Query reactome for involved biological pathways — query_reactome_pathways • pwcuratr</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="A package to facilitate curation of functional gene networks — pwcuratr" />
-<meta property="og:description" content="Todo" />
+<meta property="og:title" content="Query reactome for involved biological pathways — query_reactome_pathways" />
+<meta property="og:description" content="Get all reactome.org pathways that involve any of the genes provided." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -111,22 +111,50 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>A package to facilitate curation of functional gene networks</h1>
-    <small class="dont-index">Source: <a href='https://github.com/kkmann/pwcuratr/blob/master/R/zzz.R'><code>R/zzz.R</code></a></small>
-    <div class="hidden name"><code>pwcuratr.Rd</code></div>
+    <h1>Query reactome for involved biological pathways</h1>
+    <small class="dont-index">Source: <a href='https://github.com/kkmann/pwcuratr/blob/master/R/query_reactome_pathways.R'><code>R/query_reactome_pathways.R</code></a></small>
+    <div class="hidden name"><code>query_reactome_pathways.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Todo</p>
+    <p>Get all reactome.org pathways that involve any of the genes provided.</p>
     </div>
 
+    <pre class="usage"><span class='fu'>query_reactome_pathways</span>(<span class='no'>genes</span>)</pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>genes</th>
+      <td><p>character vector of valid ensembl gene IDs (no version suffix)</p></td>
+    </tr>
+    </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
+    <p>character vector of reactome IDs of the pathways involving at least
+one of the input genes.</p>
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='fu'>query_reactome_pathways</span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"ENSG00000130203"</span>, <span class='st'>"ENSG00000189058"</span>))</div><div class='output co'>#&gt;  [1] "R-HSA-1236394" "R-HSA-1251985" "R-HSA-1430728" "R-HSA-162582" 
+#&gt;  [5] "R-HSA-174824"  "R-HSA-196854"  "R-HSA-212436"  "R-HSA-2173782"
+#&gt;  [9] "R-HSA-2187338" "R-HSA-3000480" "R-HSA-372790"  "R-HSA-381426" 
+#&gt; [13] "R-HSA-382551"  "R-HSA-388396"  "R-HSA-392499"  "R-HSA-418594" 
+#&gt; [17] "R-HSA-5653656" "R-HSA-597592"  "R-HSA-6806667" "R-HSA-73857"  
+#&gt; [21] "R-HSA-74160"   "R-HSA-8864260" "R-HSA-8957275" "R-HSA-8963888"
+#&gt; [25] "R-HSA-8963898" "R-HSA-8963899" "R-HSA-8963901" "R-HSA-8964026"
+#&gt; [29] "R-HSA-8964043" "R-HSA-8964058" "R-HSA-9006931" "R-HSA-9006934"
+#&gt; [33] "R-HSA-9024446" "R-HSA-9029569" "R-HSA-975634"  "R-HSA-425397" 
+#&gt; [37] "R-HSA-425407"  "R-HSA-804914" </div><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
+      <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#value">Value</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>

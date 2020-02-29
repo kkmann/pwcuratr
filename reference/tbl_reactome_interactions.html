@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>A package to facilitate curation of functional gene networks — pwcuratr • pwcuratr</title>
+<title>Function gene-gene interactions — tbl_reactome_interactions • pwcuratr</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,9 @@
 
 
 
-<meta property="og:title" content="A package to facilitate curation of functional gene networks — pwcuratr" />
-<meta property="og:description" content="Todo" />
+<meta property="og:title" content="Function gene-gene interactions — tbl_reactome_interactions" />
+<meta property="og:description" content="This dataset contains the predicted functional gene-gene interactions.
+The methodology is described in" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -111,22 +112,42 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>A package to facilitate curation of functional gene networks</h1>
+    <h1>Function gene-gene interactions</h1>
     <small class="dont-index">Source: <a href='https://github.com/kkmann/pwcuratr/blob/master/R/zzz.R'><code>R/zzz.R</code></a></small>
-    <div class="hidden name"><code>pwcuratr.Rd</code></div>
+    <div class="hidden name"><code>tbl_reactome_interactions.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Todo</p>
+    <p>This dataset contains the predicted functional gene-gene interactions.
+The methodology is described in</p>
     </div>
 
+    <pre class="usage"><span class='no'>tbl_reactome_interactions</span></pre>
 
 
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
+
+    <dl class='dl-horizontal'>
+<dt>score</dt><dd><p>evidence score</p></dd>
+<dt>a</dt><dd><p>ENSEMBL gene ID of interactor a</p></dd>
+<dt>b</dt><dd><p>ENSEMBL gene ID of interactor b</p></dd>
+
+</dl>
+    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
+
+    <p><a href='http://cpws.reactome.org/caBigR3WebApp2018/FIsInGene_122718_with_annotations.txt.zip'>http://cpws.reactome.org/caBigR3WebApp2018/FIsInGene_122718_with_annotations.txt.zip</a></p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>Wu, G., Feng, X., &amp; Stein, L. (2010). A human functional protein interaction
+network and its application to cancer data analysis. Genome biology, 11(5), R53.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
+      <li><a href="#format">Format</a></li>
+      <li><a href="#source">Source</a></li>
+      <li><a href="#details">Details</a></li>
     </ul>
 
   </div>

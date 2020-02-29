@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>A package to facilitate curation of functional gene networks — pwcuratr • pwcuratr</title>
+<title>ENSEMBL ID to reactome.org pathway — tbl_ensembl2reactome • pwcuratr</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,10 @@
 
 
 
-<meta property="og:title" content="A package to facilitate curation of functional gene networks — pwcuratr" />
-<meta property="og:description" content="Todo" />
+<meta property="og:title" content="ENSEMBL ID to reactome.org pathway — tbl_ensembl2reactome" />
+<meta property="og:description" content="This dataset is used to map ENSEMBL IDs to reactome.org pathway IDs.
+It is parsed from a downloaded file of an identfier mapping from
+https://reactome.org/download." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -111,22 +113,39 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>A package to facilitate curation of functional gene networks</h1>
+    <h1>ENSEMBL ID to reactome.org pathway</h1>
     <small class="dont-index">Source: <a href='https://github.com/kkmann/pwcuratr/blob/master/R/zzz.R'><code>R/zzz.R</code></a></small>
-    <div class="hidden name"><code>pwcuratr.Rd</code></div>
+    <div class="hidden name"><code>tbl_ensembl2reactome.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Todo</p>
+    <p>This dataset is used to map ENSEMBL IDs to reactome.org pathway IDs.
+It is parsed from a downloaded file of an identfier mapping from
+https://reactome.org/download.</p>
     </div>
 
+    <pre class="usage"><span class='no'>tbl_ensembl2reactome</span></pre>
 
 
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
+
+    <dl class='dl-horizontal'>
+<dt>ensembl_id</dt><dd><p>ENSEMBL gene ID</p></dd>
+<dt>reactome_id</dt><dd><p>reactome.org ID for gene</p></dd>
+<dt>reactome_pathway_id</dt><dd><p>reactome.org ID for pathway</p></dd>
+<dt>description</dt><dd><p>reactome.org description of pathway</p></dd>
+
+</dl>
+    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
+
+    <p><a href='https://reactome.org/download/current/Ensembl2Reactome.txt'>https://reactome.org/download/current/Ensembl2Reactome.txt</a></p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
+      <li><a href="#format">Format</a></li>
+      <li><a href="#source">Source</a></li>
     </ul>
 
   </div>

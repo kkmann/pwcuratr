@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">pwcuratr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0.9000</span>
       </span>
     </div>
 
@@ -110,10 +110,10 @@
 <a class="sourceLine" id="cb2-12" data-line-number="12"><span class="co">#&gt; [21] "ENSG00000164638"</span></a></code></pre></div>
 <p>Next, external data is used to define a plausible functional neighborhood for genes that are functionally related to any of the seed genes. We start by querying a snapshot of the reactome.org pathway database for any pathways containing at least one of the seed genes.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">tbl_reactome_pathways &lt;-<span class="st"> </span><span class="kw">tibble</span>(</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">    <span class="dt">reactome_pathway_id =</span> <span class="kw">query_reactome_pathways</span>(seed_genes),</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">    <span class="dt">reactome_pathway_id =</span> <span class="kw"><a href="../reference/query_reactome_pathways.html">query_reactome_pathways</a></span>(seed_genes),</a>
 <a class="sourceLine" id="cb3-3" data-line-number="3">    <span class="dt">n_participating_genes =</span> <span class="kw">map_int</span>(</a>
 <a class="sourceLine" id="cb3-4" data-line-number="4">        reactome_pathway_id,</a>
-<a class="sourceLine" id="cb3-5" data-line-number="5">        <span class="op">~</span><span class="kw"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="kw">query_participating_genes</span>(.))</a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">        <span class="op">~</span><span class="kw"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="kw"><a href="../reference/query_participating_genes.html">query_participating_genes</a></span>(.))</a>
 <a class="sourceLine" id="cb3-6" data-line-number="6">    )</a>
 <a class="sourceLine" id="cb3-7" data-line-number="7">) <span class="op">%&gt;%</span><span class="st"> </span></a>
 <a class="sourceLine" id="cb3-8" data-line-number="8"><span class="kw">arrange</span>(n_participating_genes)</a>
@@ -317,7 +317,7 @@
 </table>
 <p>A naive approach to defining a function neighborhood for the seed genes would be to take the union of all genes who are participating in any of the identified reactome pathways. However, reactome.org pathways are defined on very different levels of granularity and it will not always be sensible to include all participating genes from very large pathways. A first step to address this ‘specificity problem’ is to hand-curate the list of pathways to consider for further processing. Here, a completely arbitrary cut-off in terms of the pathway size of 250 participating genes is chosen. To avoid loosing any of the seed genes, they are added manually to the initial list of candidate genes.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">candidate_genes &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(</a>
-<a class="sourceLine" id="cb4-2" data-line-number="2">    <span class="kw">query_participating_genes</span>(</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">    <span class="kw"><a href="../reference/query_participating_genes.html">query_participating_genes</a></span>(</a>
 <a class="sourceLine" id="cb4-3" data-line-number="3">        tbl_reactome_pathways <span class="op">%&gt;%</span><span class="st"> </span></a>
 <a class="sourceLine" id="cb4-4" data-line-number="4"><span class="st">            </span><span class="kw"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>(n_participating_genes <span class="op">&lt;=</span><span class="st"> </span><span class="dv">250</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
 <a class="sourceLine" id="cb4-5" data-line-number="5"><span class="st">            </span><span class="kw">pull</span>(reactome_pathway_id)</a>
@@ -402,16 +402,16 @@
 <a class="sourceLine" id="cb9-9" data-line-number="9"><span class="st">    </span><span class="kw"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>()</a>
 <a class="sourceLine" id="cb9-10" data-line-number="10"></a>
 <a class="sourceLine" id="cb9-11" data-line-number="11">tbl_reactome_pathways_htr &lt;-<span class="st"> </span><span class="kw">tibble</span>(</a>
-<a class="sourceLine" id="cb9-12" data-line-number="12">        <span class="dt">reactome_pathway_id =</span> <span class="kw">query_reactome_pathways</span>(seed_genes_htr),</a>
+<a class="sourceLine" id="cb9-12" data-line-number="12">        <span class="dt">reactome_pathway_id =</span> <span class="kw"><a href="../reference/query_reactome_pathways.html">query_reactome_pathways</a></span>(seed_genes_htr),</a>
 <a class="sourceLine" id="cb9-13" data-line-number="13">        <span class="dt">n_participating_genes =</span> <span class="kw">map_int</span>(</a>
 <a class="sourceLine" id="cb9-14" data-line-number="14">            reactome_pathway_id,</a>
-<a class="sourceLine" id="cb9-15" data-line-number="15">            <span class="op">~</span><span class="kw"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="kw">query_participating_genes</span>(.))</a>
+<a class="sourceLine" id="cb9-15" data-line-number="15">            <span class="op">~</span><span class="kw"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="kw"><a href="../reference/query_participating_genes.html">query_participating_genes</a></span>(.))</a>
 <a class="sourceLine" id="cb9-16" data-line-number="16">        )</a>
 <a class="sourceLine" id="cb9-17" data-line-number="17">    ) <span class="op">%&gt;%</span><span class="st"> </span></a>
 <a class="sourceLine" id="cb9-18" data-line-number="18"><span class="st">    </span><span class="kw">arrange</span>(n_participating_genes)</a>
 <a class="sourceLine" id="cb9-19" data-line-number="19"></a>
 <a class="sourceLine" id="cb9-20" data-line-number="20">candidate_genes_htr &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(</a>
-<a class="sourceLine" id="cb9-21" data-line-number="21">        <span class="kw">query_participating_genes</span>(</a>
+<a class="sourceLine" id="cb9-21" data-line-number="21">        <span class="kw"><a href="../reference/query_participating_genes.html">query_participating_genes</a></span>(</a>
 <a class="sourceLine" id="cb9-22" data-line-number="22">            tbl_reactome_pathways_htr <span class="op">%&gt;%</span><span class="st"> </span></a>
 <a class="sourceLine" id="cb9-23" data-line-number="23"><span class="st">                </span><span class="kw"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>(n_participating_genes <span class="op">&lt;=</span><span class="st"> </span><span class="dv">250</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
 <a class="sourceLine" id="cb9-24" data-line-number="24"><span class="st">                </span><span class="kw">pull</span>(reactome_pathway_id)</a>
