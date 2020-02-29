@@ -545,11 +545,4 @@ server <- function(input, output, session) {
         }
     )
 
-    output$d3 <- r2d3::renderD3({
-        r2d3::r2d3(jsonlite::read_json("miserables.json"),
-                   script = "interactive_graph.js",
-                   d3_version = 4
-        )
-    })
-
 }

@@ -87,13 +87,5 @@ ui <- navbarPage("Pathway Cluster Curation Tool", id = "navbarpage",
                 )
             )
         )
-    ),
-    tabPanel("Test",
-             sidebarLayout(
-                 sidebarPanel(),
-                 mainPanel(
-                     r2d3::d3Output("d3")
-                 )
-             )
     )
 )
