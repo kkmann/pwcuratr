@@ -16,6 +16,8 @@ Suggests:
     rmarkdown,
     pander,
     tidyverse,
+    shiny,
+    DT,
     httr,
     covr,
     testthat
@@ -34,12 +36,10 @@ Imports:
     vroom,
     readr,
     cowplot,
-    shiny,
     ggplot2,
     igraph,
     ggraph,
-    ggrepel,
-    DT
+    ggrepel
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.0.2
