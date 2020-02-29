@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Articles • pwcuratr</title>
+<title>Plot a gene network graph — plot_graph • pwcuratr</title>
 
 
 <!-- jquery -->
@@ -35,7 +35,10 @@
 
 
 
-<meta property="og:title" content="Articles" />
+<meta property="og:title" content="Plot a gene network graph — plot_graph" />
+<meta property="og:description" content="Plot a gene network graph
+Plot a gene network graph" />
+<meta name="twitter:card" content="summary" />
 
 
 
@@ -54,7 +57,7 @@
   </head>
 
   <body>
-    <div class="container template-article-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -110,17 +113,75 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Articles</h1>
+    <h1>Plot a gene network graph</h1>
+    
+    <div class="hidden name"><code>plot-gene-network.Rd</code></div>
     </div>
 
-    <div class="section ">
-      <h3>All vignettes</h3>
-      <p class="section-desc"></p>
-
-      <ul>
-        <li><a href="getting_startet.html">Getting Started</a></li>
-      </ul>
+    <div class="ref-description">
+    <p>Plot a gene network graph</p>
+<p>Plot a gene network graph</p>
     </div>
+
+    <pre class="usage"><span class='fu'>plot_graph</span>(<span class='no'>igraph</span>, <span class='no'>seed_genes</span>, <span class='kw'>title</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>titlesize</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+
+<span class='fu'>plot_pathway</span>(<span class='no'>genes</span>, <span class='no'>seed_genes</span>, <span class='kw'>minscore</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>titlesize</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>minnodes</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
+
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>igraph</th>
+      <td><p>an igraph object as returned by <code><a href='as_igraph.html'>as_igraph()</a></code></p></td>
+    </tr>
+    <tr>
+      <th>seed_genes</th>
+      <td><p>character vector of ensembl IDs of the seed genes in the igraph object</p></td>
+    </tr>
+    <tr>
+      <th>title</th>
+      <td><p>plot title</p></td>
+    </tr>
+    <tr>
+      <th>titlesize</th>
+      <td><p>text size for the title</p></td>
+    </tr>
+    <tr>
+      <th>genes</th>
+      <td><p>character vector of ensembl IDs of the genes in the network</p></td>
+    </tr>
+    <tr>
+      <th>minscore</th>
+      <td><p>minimal evidence score for edges to include (see <code><a href='as_igraph.html'>as_igraph()</a></code>)</p></td>
+    </tr>
+    <tr>
+      <th>minnodes</th>
+      <td><p>minimal number of nodes in component to include in plot</p></td>
+    </tr>
+    </table>
+
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>a ggplot object</p>
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='no'>gr</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='as_igraph.html'>as_igraph</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"ENSG00000130203"</span>, <span class='st'>"ENSG00000189058"</span>),  <span class='fl'>0.9</span>)
+<span class='fu'>plot_graph</span>(<span class='no'>gr</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"ENSG00000130203"</span>))</div><div class='img'><img src='plot-gene-network-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='fu'>plot_pathway</span>(
+    <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"ENSG00000130203"</span>, <span class='st'>"ENSG00000189058"</span>),
+    <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"ENSG00000130203"</span>, <span class='st'>"ENSG00000189058"</span>),
+    <span class='fl'>0.9</span>
+)</div><div class='img'><img src='plot-gene-network-2.png' alt='' width='700' height='433' /></div><div class='input'>
+</div></pre>
+  </div>
+  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
+    <h2>Contents</h2>
+    <ul class="nav nav-pills nav-stacked">
+      <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#value">Value</a></li>
+      <li><a href="#examples">Examples</a></li>
+    </ul>
+
   </div>
 </div>
 
