@@ -29,5 +29,11 @@ Imports:
     igraph,
     ggraph,
     ggrepel,
-    DT
+    DT,
+    dplyr,
+    magrittr,
+    purrr,
+    rlang,
+    tibble,
+    tidyr
 VignetteBuilder: knitr
