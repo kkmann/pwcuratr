@@ -4,6 +4,9 @@ globalVariables(c("tbl_reactome_interactions", "tbl_ensembl", "tbl_ensembl2react
 #'
 #' Todo
 #'
+#' @import tidyverse
+#' @import DT
+#'
 #' @importFrom rlang .data
 #' @importFrom magrittr %>%
 #' @importFrom tibble as_tibble enframe
