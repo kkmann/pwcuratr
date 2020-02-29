@@ -6,6 +6,8 @@ Author: Kevin Kunzmann <kevin.kunzmann@mrc-bsu.cam.ac.uk>
 Maintainer: Kevin Kunzmann <kevin.kunzmann@mrc-bsu.cam.ac.uk>
 Description: Elicit candidate gene networks based on sets of seed genes using
     predicted functional gene-gene interactions.
+URL: https://github.com/kkmann/pwcuratr
+BugReports: https://github.com/kkmann/pwcuratr/issues
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
