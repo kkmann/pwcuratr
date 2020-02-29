@@ -20,7 +20,6 @@ facilitates data manipulation and plotting.
 
 ```{r setup}
 library(pwcuratr)
-library(glue)
 library(tidyverse)
 library(pander)
 ```
@@ -34,7 +33,7 @@ The list of genes can be loaded via
 
 ```{r}
 seed_genes <- read_csv(
-    glue("{find.package('pwcuratr')}/data/seed_genes.csv"),
+    system.file("extdata/serotonin_seed_genes.csv", package="pwcuratr"),
     col_types = c(ensembl_gene_id = col_character())
 )$ensembl_gene_id
 
@@ -99,7 +98,7 @@ The set of interactions is scored between 0 (low confidence) and 1
 (high confidence) for functional interaction between the 
 respective genes.
 ```{r}
-pwcuratr_tbls$reactome_interactions %>% 
+tbl_reactome_interactions %>% 
     ggplot() + 
     aes(score) + 
     geom_histogram(binwidth = .01) +
@@ -110,8 +109,8 @@ pwcuratr_tbls$reactome_interactions %>%
 Clearly, the majority of included interactions has a confidence
 score of 0.9 or greater and we filter the set of interactions 
 with this threshold.
-This results in a gene interaciton network that can be used to
-refine our notion of funcional neighborhood.
+This results in a gene interaction network that can be used to
+refine our notion of functional neighborhood.
 We want to filter the set of candidate genes derived above such 
 that only genes that are connected to a seed gene via at most $k$
 edges are retained.
@@ -195,7 +194,7 @@ Since the HTR3 subsystem is not connected, we can filter these seed
 genes out as well.
 
 ```{r}
-seed_genes_htr <- pwcuratr_tbls$ensemble %>% 
+seed_genes_htr <- tbl_ensembl %>% 
     select(external_gene_name, ensembl_gene_id) %>% 
     distinct() %>% 
     filter(

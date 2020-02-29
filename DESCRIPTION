@@ -1,33 +1,51 @@
 Package: pwcuratr
 Type: Package
 Title: Functional Pathway Cluster Curation tool
-Version: 0.1.0
+Version: 0.1.0.9000
 Author: Kevin Kunzmann <kevin.kunzmann@mrc-bsu.cam.ac.uk>
 Maintainer: Kevin Kunzmann <kevin.kunzmann@mrc-bsu.cam.ac.uk>
 Description: Elicit candidate gene networks based on sets of seed genes using
-    biological functional gene-gene interactions.
-License: MIT + file
+    predicted functional gene-gene interactions.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Suggests: 
     knitr,
     rmarkdown,
     pander,
-    covr
-Depends:
     tidyverse,
+    httr,
+    covr,
+    testthat
+Depends:
     R (>= 3.5.0)
 Imports:
     glue,
     scales,
+    dplyr,
+    magrittr,
+    purrr,
+    rlang,
+    tibble,
+    tidyr,
     tidygraph,
     vroom,
     readr,
     cowplot,
-    httr,
     shiny,
+    ggplot2,
     igraph,
     ggraph,
     ggrepel,
     DT
 VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.0.2
+Collate: 
+    'zzz.R'
+    'as_igraph.R'
+    'plot_pathway.R'
+    'prune.R'
+    'query_reactome_pathways.R'
+    'start_shiny_app.R'
+    'util.R'
