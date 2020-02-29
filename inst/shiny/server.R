@@ -12,7 +12,7 @@ server <- function(input, output, session) {
 
     tbls <- reactiveValues()
     tbls$interactions_gene_gene <- reactive({
-            pwcuratr_tbls$reactome_interactions %>%
+            tbl_reactome_interactions %>%
                 filter(score >= input$minScore)
         })
     tbls$seed_genes <- tibble(
@@ -56,7 +56,7 @@ server <- function(input, output, session) {
                 seed_genes = map_chr(
                     seed_genes,
                     function(seed_genes) {
-                        pwcuratr_tbls$ensemble %>%
+                        tbl_ensembl %>%
                             select(ensembl_gene_id, external_gene_name) %>%
                             filter(ensembl_gene_id %in% seed_genes) %>%
                             distinct() %>%
@@ -105,7 +105,7 @@ server <- function(input, output, session) {
                 pathway = query_reactome_pathways(sg)
             ) %>%
             left_join(
-                pwcuratr_tbls$ensembl2pathways %>%
+                tbl_ensembl2reactome %>%
                     select(reactome_pathway_id, description) %>%
                     distinct(),
                 by = c(pathway = "reactome_pathway_id")
@@ -118,7 +118,7 @@ server <- function(input, output, session) {
                 n_genes = map_int(
                     pathway,
                     ~filter(
-                        pwcuratr_tbls$ensembl2pathways,
+                        tbl_ensembl2reactome,
                         reactome_pathway_id == .,
                     ) %>%
                         select(reactome_pathway_id, ensembl_id) %>%
@@ -148,7 +148,7 @@ server <- function(input, output, session) {
                 !(ensembl_gene_id %in% tbls$seed_genes$ensembl_gene_id)
             ) %>%
             left_join(
-                pwcuratr_tbls$ensemble %>%
+                tbl_ensembl %>%
                     dplyr::select(external_gene_name, ensembl_gene_id) %>%
                     dplyr::filter(complete.cases(.)),
                 by = "ensembl_gene_id"
@@ -251,13 +251,13 @@ server <- function(input, output, session) {
                 ) %>%
                 summarise(
                     `#pathways` = as.character(n()),
-                    `#genes`    = pwcuratr_tbls$ensembl2pathways %>%
+                    `#genes`    = tbl_ensembl2reactome %>%
                         filter(reactome_pathway_id %in% pathway) %>%
                         pull(ensembl_id) %>%
                         unique %>%
                         length() %>%
                         as.character(),
-                    `seed genes covered` = pwcuratr_tbls$ensemble %>%
+                    `seed genes covered` = tbl_ensembl %>%
                         select(ensembl_gene_id, external_gene_name) %>%
                         filter(ensembl_gene_id %in% unlist(seed_genes)) %>%
                         distinct() %>%
@@ -265,7 +265,7 @@ server <- function(input, output, session) {
                         unique() %>%
                         sort() %>%
                         paste(collapse = ", "),
-                    `seed genes not covered` = pwcuratr_tbls$ensemble %>%
+                    `seed genes not covered` = tbl_ensembl %>%
                         select(ensembl_gene_id, external_gene_name) %>%
                         filter(
                             ensembl_gene_id %in% rv$seed_genes_selected,
@@ -283,7 +283,7 @@ server <- function(input, output, session) {
                 `#pathways` = "0",
                 `#genes`    = "0",
                 `seed genes selected` = "",
-                `seed genes not selected` = pwcuratr_tbls$ensemble %>%
+                `seed genes not selected` = tbl_ensembl %>%
                     select(ensembl_gene_id, external_gene_name) %>%
                     filter(
                         ensembl_gene_id %in% unlist(tbls$seed_genes$ensembl_gene_id)
@@ -544,5 +544,12 @@ server <- function(input, output, session) {
             file.rename(glue("{tdir}/tmp.zip"), file)
         }
     )
+
+    output$d3 <- r2d3::renderD3({
+        r2d3::r2d3(jsonlite::read_json("miserables.json"),
+                   script = "interactive_graph.js",
+                   d3_version = 4
+        )
+    })
 
 }

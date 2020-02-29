@@ -19,7 +19,7 @@ ui <- navbarPage("Pathway Cluster Curation Tool", id = "navbarpage",
                 hr(),
                 selectizeInput("selectGene",
                     label  = "add gene directly",
-                    choices = pwcuratr_tbls$ensemble %>%
+                    choices = tbl_ensembl %>%
                         transmute(
                             gene = sprintf("%s (%s)", external_gene_name, ensembl_gene_id)
                         ) %>%
@@ -87,5 +87,13 @@ ui <- navbarPage("Pathway Cluster Curation Tool", id = "navbarpage",
                 )
             )
         )
+    ),
+    tabPanel("Test",
+             sidebarLayout(
+                 sidebarPanel(),
+                 mainPanel(
+                     r2d3::d3Output("d3")
+                 )
+             )
     )
 )
