@@ -9,4 +9,5 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
-^readme.md$
+^README.md$
+^LICENSE\.md$

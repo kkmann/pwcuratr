@@ -1,0 +1,242 @@
+---
+title: "Getting Started"
+output: rmarkdown::html_vignette
+vignette: >
+    %\VignetteIndexEntry{pwcuratr}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+    collapse  = TRUE,
+    comment   = "#>",
+    fig.width = 7.5
+)
+```
+
+Start by loading `pwcuratr` and a collection of packages that 
+facilitates data manipulation and plotting.
+
+```{r setup}
+library(pwcuratr)
+library(tidyverse)
+library(pander)
+```
+
+The first step to curating a pathway cluster is to define a 
+set of 'seed genes' that are of interest.
+This set could, e.g., be defined via an extensive literature review.
+The package `pwcuratr` comes with a set of genes associated with
+serotonin neurotransmitter pathways.
+The list of genes can be loaded via
+
+```{r}
+seed_genes <- read_csv(
+    system.file("extdata/serotonin_seed_genes.csv", package="pwcuratr"),
+    col_types = c(ensembl_gene_id = col_character())
+)$ensembl_gene_id
+
+print(seed_genes)
+```
+
+Next, external data is used to define a plausible functional
+neighborhood for genes that are functionally related to 
+any of the seed genes.
+We start by querying a snapshot of the reactome.org pathway
+database for any pathways containing at least one of the seed genes.
+
+```{r}
+tbl_reactome_pathways <- tibble(
+    reactome_pathway_id = query_reactome_pathways(seed_genes),
+    n_participating_genes = map_int(
+        reactome_pathway_id,
+        ~length(query_participating_genes(.))
+    )
+) %>% 
+arrange(n_participating_genes)
+
+pander(tbl_reactome_pathways)
+```
+
+A naive approach to defining a function neighborhood for the seed
+genes would be to take the union of all genes who are participating
+in any of the identified reactome pathways.
+However, reactome.org pathways are defined on very different 
+levels of granularity and it will not always be sensible to include
+all participating genes from very large pathways.
+A first step to address this 'specificity problem' is to hand-curate
+the list of pathways to consider for further processing.
+Here, a completely arbitrary cut-off in terms of the pathway 
+size of 250 participating genes is chosen.
+To avoid loosing any of the seed genes, they are added manually to
+the initial list of candidate genes.
+
+```{r}
+candidate_genes <- c(
+    query_participating_genes(
+        tbl_reactome_pathways %>% 
+            filter(n_participating_genes <= 250) %>% 
+            pull(reactome_pathway_id)
+    ),
+    seed_genes
+) %>% 
+unique
+
+
+length(candidate_genes)
+```
+
+To refine the candidate set of genes even further, 
+predicted functional gene-gene interactions based on the 2018
+release of the interactions derived in
+
+> Wu, G., Feng, X., & Stein, L. (2010). A human functional protein interaction network and its application to cancer data analysis. Genome biology, 11(5), R53.
+
+are used.
+The set of interactions is scored between 0 (low confidence) and 1 
+(high confidence) for functional interaction between the 
+respective genes.
+```{r}
+tbl_reactome_interactions %>% 
+    ggplot() + 
+    aes(score) + 
+    geom_histogram(binwidth = .01) +
+    ggtitle("Confidence score distribution for functional interactions") +
+    theme_bw()
+```
+
+Clearly, the majority of included interactions has a confidence
+score of 0.9 or greater and we filter the set of interactions 
+with this threshold.
+This results in a gene interaction network that can be used to
+refine our notion of functional neighborhood.
+We want to filter the set of candidate genes derived above such 
+that only genes that are connected to a seed gene via at most $k$
+edges are retained.
+
+```{r}
+tibble(
+    maxedgedistance = 0:10,
+    n_genes_pruned  = map_int(
+        maxedgedistance,
+        ~length(prune(
+            candidate_genes, 
+            seed_genes, 
+            minscore        = .9, 
+            maxedgedistance = .
+        ))
+    )
+) %>% 
+ggplot() +
+    aes(maxedgedistance, n_genes_pruned) +
+    geom_line() + 
+    geom_point() +
+    scale_y_continuous(
+        "number of retained genes",
+        limits = c(0L, NA_integer_)
+    ) + 
+    scale_x_continuous("maximal edge distance", breaks = 0:10) +
+    ggtitle("Number of retained candiate genes by choice of maximal edge-distance (k)") +
+    theme_bw() + 
+    theme(
+        panel.grid.minor = element_blank()
+    )
+```
+
+The final choice of $k$ can only be justified by manually inspecting 
+the resulting gene-networks.
+As an example, consider the choice $k=2$.
+We first prune the set of candidate genes and then create an
+igraph object to represent the network information.
+This allows us to use the wealth of graph-based techniques
+implemented in `igraph` package.
+For instance, one may be interested in the number of connected 
+components of the pruned gene network.
+
+```{r}
+candidate_genes <- prune(
+    candidate_genes, 
+    seed_genes, 
+    minscore        = .9, 
+    maxedgedistance = 2
+) 
+
+gr <- as_igraph(candidate_genes, minscore = .9)
+
+igraph::components(gr)$csize
+```
+
+There are 7 components with almost all candidate genes connected in 
+the first components and two small non-trivial components.
+All components of size 1 correspond to seed genes for which no 
+functional neighbors in the selected reactome.org pathways 
+where found. 
+
+```{r, fig.width=12, fig.height=3*3*6}
+plot_pathway(
+    candidate_genes, 
+    seed_genes, 
+    minscore  = 0.9, 
+    titlesize = 20
+)
+```
+
+Based on this visual representation, the neighborhood parameters could 
+be tweaked or the set of initial reactome pathways could be altered.
+In the presence of non-connected components it might be worthwhile 
+considering a split of the pathway cluster such that each individual
+network is fully connected.
+
+For instance, one could consider the HTR subsystem separately by 
+restricting the initial set of seed genes.
+Since the HTR3 subsystem is not connected, we can filter these seed 
+genes out as well.
+
+```{r}
+seed_genes_htr <- tbl_ensembl %>% 
+    select(external_gene_name, ensembl_gene_id) %>% 
+    distinct() %>% 
+    filter(
+        ensembl_gene_id %in% seed_genes, 
+        str_detect(external_gene_name, "HTR[^3]")
+    ) %>% 
+    pull(ensembl_gene_id) %>% 
+    unique()
+
+tbl_reactome_pathways_htr <- tibble(
+        reactome_pathway_id = query_reactome_pathways(seed_genes_htr),
+        n_participating_genes = map_int(
+            reactome_pathway_id,
+            ~length(query_participating_genes(.))
+        )
+    ) %>% 
+    arrange(n_participating_genes)
+
+candidate_genes_htr <- c(
+        query_participating_genes(
+            tbl_reactome_pathways_htr %>% 
+                filter(n_participating_genes <= 250) %>% 
+                pull(reactome_pathway_id)
+        ),
+        seed_genes_htr
+    ) %>% 
+    unique %>% 
+    prune(
+        seed_genes_htr, 
+        minscore        = .9, 
+        maxedgedistance = 2
+    ) 
+
+gr <- as_igraph(candidate_genes_htr, minscore = .9)
+
+igraph::components(gr)$csize
+```
+
+```{r, fig.width=12, fig.height=12}
+plot_graph(
+    gr, 
+    seed_genes,
+    titlesize = 20
+)
+```
