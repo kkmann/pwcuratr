@@ -1,8 +1,6 @@
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/kkmann/pwcuratr/master?urlpath=shiny/inst/shiny/)
+# Candidate Gene Pathway Clusters
 
 **tl;dr:** elicit candidate gene networks based on seed-genes.
-
-# Candidate Gene Pathway Clusters
 
 This tool allows the defintion of candidate gene networks based on a set of 
 seed genes, a combination of [reactome](https://reactome.org/) pathway
@@ -15,8 +13,7 @@ downloaded from [https://reactome.org/download-data](https://reactome.org/downlo
 Internally all mappings are done via an [ENSEMBL](https://www.ensembl.org/index.html)
 version 97 snapshot downloaded using the [biomaRt](https://bioconductor.org/packages/release/bioc/html/biomaRt.html) package.
 
-The shiny app is hosted [here](https://mybinder.org/v2/gh/kkmann/pwcuratr/master?urlpath=shiny/inst/shiny/)
-using [binder.org](https://mybinder.org/).
+The app is part of the R package [pwcuratr](https://github.com/kkmann/pwcuratr).
 
 
 ## Define Seed-Genes
