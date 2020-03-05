@@ -59,7 +59,7 @@ get_external_names <- function(genes) {
     pull(
         .data$external_gene_name
     )
-    assertthat::assert_that(length(res) == length(genes))
+    if (length(res) != length(genes)) stop("mismatch")
     return(res)
 }
 
