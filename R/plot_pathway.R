@@ -28,7 +28,7 @@ plot_graph <- function(igraph, seed_genes, title = NULL, titlesize = 10) {
         ggr %>%
             as_tibble() %>%
             mutate(
-                external_gene_name = get_external_names(name)
+                external_gene_name = get_external_names(.data$name)
             ) %>%
             group_by(.data$name) %>%
             summarise(

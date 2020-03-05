@@ -44,7 +44,7 @@ find_isolates <- function(genes, minscore = 0) {
 #'
 #' @export
 get_external_names <- function(genes) {
-    res <- tibble(
+    res <- tibble::tibble(
         ensembl_gene_id = genes
     ) %>%
     left_join(
