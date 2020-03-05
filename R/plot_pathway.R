@@ -27,18 +27,15 @@ plot_graph <- function(igraph, seed_genes, title = NULL, titlesize = 10) {
         ggr,
         ggr %>%
             as_tibble() %>%
-            left_join(
-                tbl_ensembl %>%
-                    select(.data$external_gene_name, .data$ensembl_gene_id) %>%
-                    distinct(),
-                by = c(name = "ensembl_gene_id")
+            mutate(
+                external_gene_name = get_external_names(name)
             ) %>%
             group_by(.data$name) %>%
             summarise(
                 external_name = paste(unique(.data$external_gene_name), collapse = "|")
             ) %>%
             mutate(
-                external_name = ifelse(.data$external_name == "", .data$name, .data$external_name)
+                external_name = ifelse(.data$external_name == "unknown", .data$name, .data$external_name)
             ),
         by = "name"
     )

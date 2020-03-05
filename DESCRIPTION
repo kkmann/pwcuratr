@@ -1,7 +1,7 @@
 Package: pwcuratr
 Type: Package
 Title: Functional Pathway Cluster Curation tool
-Version: 0.2.1
+Version: 0.2.2.9000
 Author: Kevin Kunzmann <kevin.kunzmann@mrc-bsu.cam.ac.uk>
 Maintainer: Kevin Kunzmann <kevin.kunzmann@mrc-bsu.cam.ac.uk>
 Description: Elicit candidate gene networks based on sets of seed genes using

@@ -2,7 +2,7 @@ valid_ensembl_gene_ids <- function(genes) {
     problematic_genes <- genes[!(genes %in% tbl_ensembl$ensembl_gene_id)]
     if (length(problematic_genes) == 0)
         return(TRUE)
-    stop(
+    warning(
         glue("\rensembl gene IDs not found:\n\r{paste(problematic_genes, collapse = '\n\r')}")
     )
 }
@@ -11,7 +11,7 @@ valid_reactome_pathways <- function(pathways) {
     problematic_pathways <- pathways[!(pathways %in% tbl_ensembl2reactome$reactome_pathway_id)]
     if (length(problematic_pathways) == 0)
         return(TRUE)
-    stop(
+    warning(
         glue("\rreactome pathway IDs not found:\n\r{paste(problematic_pathways, collapse = '\n\r')}")
     )
 }
@@ -29,6 +29,39 @@ find_isolates <- function(genes, minscore = 0) {
     ])
 }
 
+
+
+#' Convert ENSEMBL IDs to external gene names
+#'
+#' @param genes character vector of valid ENEMBL gene IDs (no version suffix)
+#'
+#' @return character vector of matching external gene names
+#'
+#' @examples
+#' get_external_names("ENSG00000278801")
+#'
+#' @include zzz.R
+#'
+#' @export
+get_external_names <- function(genes) {
+    res <- tibble(
+        ensembl_gene_id = genes
+    ) %>%
+    left_join(
+        tbl_ensembl,
+        by = "ensembl_gene_id"
+    ) %>%
+    mutate(
+        external_gene_name = ifelse(
+            is.na(.data$external_gene_name), "unknown", .data$external_gene_name
+        )
+    ) %>%
+    pull(
+        .data$external_gene_name
+    )
+    assertthat::assert_that(length(res) == length(genes))
+    return(res)
+}
 
 
 

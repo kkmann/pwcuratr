@@ -5,11 +5,6 @@ library(tidyverse)
 
 server <- function(input, output, session) {
 
-    rv <- reactiveValues(
-        trigger_pathway_table_update = 0,
-        seed_genes_selected          = character(0L)
-    )
-
     tbls <- reactiveValues()
     tbls$interactions_gene_gene <- reactive({
             tbl_reactome_interactions %>%
@@ -45,6 +40,13 @@ server <- function(input, output, session) {
         rownames = FALSE
     )
     tblSeedGenesProxy   <- DT::dataTableProxy("tblSeedGenes")
+    seed_genes_selected <- reactive({
+        tbls$seed_genes %>%
+            filter(
+                row_number() %in% input$tblSeedGenes_rows_selected
+            ) %>%
+            pull(ensembl_gene_id)
+    })
 
     output$tbl_candidate_pathways <- DT::renderDataTable({
         tbls$pathways %>%
@@ -56,12 +58,7 @@ server <- function(input, output, session) {
                 seed_genes = map_chr(
                     seed_genes,
                     function(seed_genes) {
-                        tbl_ensembl %>%
-                            select(ensembl_gene_id, external_gene_name) %>%
-                            filter(ensembl_gene_id %in% seed_genes) %>%
-                            distinct() %>%
-                            pull(external_gene_name) %>%
-                            paste(collapse = ", ")
+                        get_external_names(seed_genes) %>% paste(collapse = ", ")
                     }
                 )
             ) %>%
@@ -98,7 +95,7 @@ server <- function(input, output, session) {
                     description = col_character()
                 )
             ) %>%
-                pull(pathway)
+            pull(pathway)
             setwd(odir)
         }
         tbls$pathways <- tibble(
@@ -129,7 +126,7 @@ server <- function(input, output, session) {
             arrange(n_genes)
 
         tblCandidatePathwaysProxy %>%
-        DT::selectRows(which(tbls$pathways$pathway %in% pathways_selected_old_cache))
+            DT::selectRows(which(tbls$pathways$pathway %in% pathways_selected_old_cache))
     }
 
     observeEvent(input$uploadSeedGenesFile, {
@@ -147,11 +144,8 @@ server <- function(input, output, session) {
             filter(
                 !(ensembl_gene_id %in% tbls$seed_genes$ensembl_gene_id)
             ) %>%
-            left_join(
-                tbl_ensembl %>%
-                    dplyr::select(external_gene_name, ensembl_gene_id) %>%
-                    dplyr::filter(complete.cases(.)),
-                by = "ensembl_gene_id"
+            mutate(
+                external_gene_name = get_external_names(ensembl_gene_id)
             ) %>%
             dplyr::distinct(external_gene_name, ensembl_gene_id)
         seed_genes_selected_new <- new_data$ensembl_gene_id
@@ -170,8 +164,6 @@ server <- function(input, output, session) {
             DT::selectRows(
                 which(tbls$seed_genes$ensembl_gene_id %in% seed_genes_selected)
             )
-
-        rv$seed_genes_selected <- seed_genes_selected
     })
 
     observeEvent(input$addGene, {
@@ -200,8 +192,6 @@ server <- function(input, output, session) {
             DT::selectRows(
                 which(tbls$seed_genes$ensembl_gene_id %in% seed_genes_selected)
             )
-
-        rv$seed_genes_selected <- seed_genes_selected
     })
 
     observeEvent(input$uploadPathwayZip, {
@@ -215,19 +205,20 @@ server <- function(input, output, session) {
                 ensembl_gene_id    = col_character()
             )
         ) %>%
+        mutate(
+            external_gene_name = get_external_names(ensembl_gene_id)
+        ) %>%
         dplyr::distinct()
         setwd(odir)
 
         tblSeedGenesProxy %>%
             DT::selectRows(1:nrow(tbls$seed_genes))
-
-        rv$seed_genes_selected <- c(tbls$seed_genes$ensembl_gene_id)
     })
 
     output$tbl_selectedSeedGenes <- renderTable({
         tbls$seed_genes %>%
             filter(
-                ensembl_gene_id %in% rv$seed_genes_selected
+                ensembl_gene_id %in% seed_genes_selected()
             ) %>%
             arrange(external_gene_name) %>%
             transmute(
@@ -240,7 +231,7 @@ server <- function(input, output, session) {
 
     observeEvent(
         input$btn_updatePathwaySelection,
-        update_pathways(rv$seed_genes_selected)
+        update_pathways(seed_genes_selected())
     )
 
     output$tbl_candidate_pathway_summary <- renderTable({
@@ -257,22 +248,17 @@ server <- function(input, output, session) {
                         unique %>%
                         length() %>%
                         as.character(),
-                    `seed genes covered` = tbl_ensembl %>%
-                        select(ensembl_gene_id, external_gene_name) %>%
-                        filter(ensembl_gene_id %in% unlist(seed_genes)) %>%
-                        distinct() %>%
-                        pull(external_gene_name) %>%
+                    `seed genes covered` = seed_genes_selected()[
+                            seed_genes_selected() %in% unlist(seed_genes)
+                        ] %>%
+                        get_external_names() %>%
                         unique() %>%
                         sort() %>%
                         paste(collapse = ", "),
-                    `seed genes not covered` = tbl_ensembl %>%
-                        select(ensembl_gene_id, external_gene_name) %>%
-                        filter(
-                            ensembl_gene_id %in% rv$seed_genes_selected,
-                            !(ensembl_gene_id %in% unlist(seed_genes))
-                        ) %>%
-                        distinct() %>%
-                        pull(external_gene_name) %>%
+                    `seed genes not covered` = seed_genes_selected()[
+                            !(seed_genes_selected() %in% unlist(seed_genes))
+                        ] %>%
+                        get_external_names() %>%
                         unique() %>%
                         sort() %>%
                         paste(collapse = ", ")
@@ -282,14 +268,9 @@ server <- function(input, output, session) {
             tibble(
                 `#pathways` = "0",
                 `#genes`    = "0",
-                `seed genes selected` = "",
-                `seed genes not selected` = tbl_ensembl %>%
-                    select(ensembl_gene_id, external_gene_name) %>%
-                    filter(
-                        ensembl_gene_id %in% unlist(tbls$seed_genes$ensembl_gene_id)
-                    ) %>%
-                    distinct() %>%
-                    pull(external_gene_name) %>%
+                `seed genes covered` = "",
+                `seed genes not covered` = seed_genes_selected() %>%
+                    get_external_names() %>%
                     unique() %>%
                     sort() %>%
                     paste(collapse = ", ")
@@ -306,7 +287,7 @@ server <- function(input, output, session) {
             pull(pathway) %>%
             query_participating_genes %>%
             prune(
-                seed_genes      = rv$seed_genes_selected,
+                seed_genes      = seed_genes_selected(),
                 maxedgedistance = maxedgedistance,
                 minscore        = minscore
             )
@@ -391,14 +372,14 @@ server <- function(input, output, session) {
 
     output$component_selector <- renderUI({
         req(input$minScore, input$pruning_distance)
-        if (length(rv$seed_genes_selected) == 0) return(NULL)
+        if (length(seed_genes_selected()) == 0) return(NULL)
         if (tbls$pathways %>%
             filter(
                 row_number() %in% input$tbl_candidate_pathways_rows_selected
             ) %>%
             pull(pathway) %>%
             length() == 0) {
-            cdt_genes <- rv$seed_genes_selected
+            cdt_genes <- seed_genes_selected()
         } else {
             cdt_genes <- candidate_genes(
                 minscore        = input$minScore,
@@ -506,7 +487,7 @@ server <- function(input, output, session) {
             tdir <- dirname(file)
             tbls$seed_genes %>%
                 filter(
-                    ensembl_gene_id %in% rv$seed_genes_selected
+                    ensembl_gene_id %in% seed_genes_selected()
                 ) %>%
                 write_csv(path = glue("{tdir}/seed_genes.csv"))
             tbls$pathways %>%
