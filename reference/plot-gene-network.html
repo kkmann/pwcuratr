@@ -122,7 +122,17 @@ Plot a gene network graph" />
 <p>Plot a gene network graph</p>
     </div>
 
-    <pre class="usage"><span class='fu'>plot_graph</span>(<span class='no'>igraph</span>, <span class='no'>seed_genes</span>, <span class='kw'>title</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>titlesize</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+    <pre class="usage"><span class='fu'>plot_graph</span>(
+  <span class='no'>igraph</span>,
+  <span class='no'>seed_genes</span>,
+  <span class='kw'>title</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>titlesize</span> <span class='kw'>=</span> <span class='fl'>10</span>,
+  <span class='kw'>textsize</span> <span class='kw'>=</span> <span class='fl'>3</span>,
+  <span class='kw'>pointsize</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>edgesize</span> <span class='kw'>=</span> <span class='fl'>0.5</span>,
+  <span class='kw'>layout</span> <span class='kw'>=</span> <span class='st'>"stress"</span>,
+  <span class='kw'>layout_args</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+)
 
 <span class='fu'>plot_pathway</span>(<span class='no'>genes</span>, <span class='no'>seed_genes</span>, <span class='kw'>minscore</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>titlesize</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>minnodes</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
 
@@ -135,7 +145,7 @@ Plot a gene network graph" />
     </tr>
     <tr>
       <th>seed_genes</th>
-      <td><p>character vector of ensembl IDs of the seed genes in the igraph object</p></td>
+      <td><p>character vector of ENSEMBL IDs of the seed genes in the igraph object</p></td>
     </tr>
     <tr>
       <th>title</th>
@@ -144,6 +154,26 @@ Plot a gene network graph" />
     <tr>
       <th>titlesize</th>
       <td><p>text size for the title</p></td>
+    </tr>
+    <tr>
+      <th>textsize</th>
+      <td><p>text size for labels</p></td>
+    </tr>
+    <tr>
+      <th>pointsize</th>
+      <td><p>point size</p></td>
+    </tr>
+    <tr>
+      <th>edgesize</th>
+      <td><p>edge strength</p></td>
+    </tr>
+    <tr>
+      <th>layout</th>
+      <td><p>ggraph layout</p></td>
+    </tr>
+    <tr>
+      <th>layout_args</th>
+      <td><p>list of argments to pass to ggraph layout function</p></td>
     </tr>
     <tr>
       <th>genes</th>
