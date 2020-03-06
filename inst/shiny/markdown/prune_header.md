@@ -9,3 +9,4 @@ Only candidate genes that are
 $k$ 
 or fewer edges (interactions) away from one of
 the seed genes are retained.
+Black labels correspond to seed genes, connected components are color-coded.

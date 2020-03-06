@@ -28,7 +28,7 @@ The first step to curating a pathway cluster is to define a
 set of 'seed genes' that are of interest.
 This set could, e.g., be defined via an extensive literature review.
 The package `pwcuratr` comes with a set of genes associated with
-serotonin neurotransmitter pathways.
+the serotonin neurotransmitter pathways.
 The list of genes can be loaded via
 
 ```{r}
@@ -48,13 +48,13 @@ database for any pathways containing at least one of the seed genes.
 
 ```{r}
 tbl_reactome_pathways <- tibble(
-    reactome_pathway_id = query_reactome_pathways(seed_genes),
-    n_participating_genes = map_int(
-        reactome_pathway_id,
-        ~length(query_participating_genes(.))
-    )
-) %>% 
-arrange(n_participating_genes)
+        reactome_pathway_id   = query_reactome_pathways(seed_genes),
+        n_participating_genes = map_int(
+                reactome_pathway_id,
+                ~length(query_participating_genes(.))
+            )
+    ) %>% 
+    arrange(n_participating_genes)
 
 pander(tbl_reactome_pathways)
 ```
@@ -74,14 +74,14 @@ the initial list of candidate genes.
 
 ```{r}
 candidate_genes <- c(
-    query_participating_genes(
-        tbl_reactome_pathways %>% 
-            filter(n_participating_genes <= 250) %>% 
-            pull(reactome_pathway_id)
-    ),
-    seed_genes
-) %>% 
-unique
+        query_participating_genes(
+            tbl_reactome_pathways %>% 
+                filter(n_participating_genes <= 250) %>% 
+                pull(reactome_pathway_id)
+        ),
+        seed_genes
+    ) %>% 
+    unique
 
 
 length(candidate_genes)
@@ -173,12 +173,13 @@ All components of size 1 correspond to seed genes for which no
 functional neighbors in the selected reactome.org pathways 
 where found. 
 
-```{r, fig.width=12, fig.height=3*3*6}
-plot_pathway(
-    candidate_genes, 
-    seed_genes, 
-    minscore  = 0.9, 
-    titlesize = 20
+```{r, fig.width=8, fig.height=8, dpi=100}
+plot_graph(
+    gr, 
+    seed_genes,
+    title       = "Serotonin Pathway Cluster",
+    layout      = "stress",
+    layout_args = list(bbox = 3)
 )
 ```
 
@@ -233,10 +234,9 @@ gr <- as_igraph(candidate_genes_htr, minscore = .9)
 igraph::components(gr)$csize
 ```
 
-```{r, fig.width=12, fig.height=12}
+```{r, fig.width=8, fig.height=8, dpi=100}
 plot_graph(
     gr, 
-    seed_genes,
-    titlesize = 20
+    seed_genes
 )
 ```

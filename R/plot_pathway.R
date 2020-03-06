@@ -100,7 +100,6 @@ plot_graph <- function(igraph,
             box.padding   = grid::unit(textsize * 0.033, "lines"),
             size          = textsize
         ) +
-        ggplot2::scale_colour_brewer(type = "qual", palette = 1) +
         {if (!is.null(title)) {ggplot2::ggtitle(label = title)} else {NULL}} +
         ggplot2::theme_bw() +
         ggplot2::theme(
