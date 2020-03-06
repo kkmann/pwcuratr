@@ -59,6 +59,8 @@ ui <- navbarPage("Pathway Cluster Curation Tool", id = "navbarpage",
     tabPanel("Prune & Plot",
         sidebarLayout(
             sidebarPanel(
+                uiOutput("pathwayName"),
+                hr(),
                 fluidRow(
                     column(6, uiOutput('pruning_distance')),
                     column(6, uiOutput('minscore'))
@@ -66,15 +68,42 @@ ui <- navbarPage("Pathway Cluster Curation Tool", id = "navbarpage",
                 hr(),
                 uiOutput("component_selector"),
                 fluidRow(
-                    column(6, numericInput('plt_height', label = 'height',
+                    column(6, numericInput('plt_height', label = 'height (in)',
                                            min = 4, max = 50, value = 7
                     )),
-                    column(6, numericInput('plt_width', label = 'width',
+                    column(6, numericInput('plt_width', label = 'width (in)',
                                            min = 4, max = 50, value = NA_integer_
+                    )),
+                ),
+                fluidRow(
+                    column(6, numericInput('plt_textsize', label = 'text-size',
+                                           min = .5, max = 5, value = 4, step = .1
+                    )),
+                    column(6, numericInput('plt_pointsize', label = 'point-size',
+                                           min = .5, max = 2, value = 2.5, step = .1
                     ))
                 ),
+                fluidRow(
+                    column(6, numericInput('plt_edgesize',
+                        label = 'edge-size',
+                        min = .1,
+                        max = 1,
+                        value = .5,
+                        step = .1
+                    )),
+                    column(6, numericInput('plt_bbox',
+                        label = 'bounding box',
+                        min = 1,
+                        max = 50,
+                        value = 3,
+                        step = 1
+                    ))
+                ),
+                fluidRow(
+                    column(6, actionButton("plot", "plot", width = "100%")),
+                    column(6, downloadButton("downloadPlot", label = "download"))
+                ),
                 hr(),
-                uiOutput("pathwayName"),
                 downloadButton("download",
                     label = "download pathway cluster"
                 )

@@ -1,9 +1,14 @@
 #' Plot a gene network graph
 #'
 #' @param igraph an igraph object as returned by [as_igraph()]
-#' @param seed_genes character vector of ensembl IDs of the seed genes in the igraph object
+#' @param seed_genes character vector of ENSEMBL IDs of the seed genes in the igraph object
 #' @param title plot title
 #' @param titlesize text size for the title
+#' @param textsize text size for labels
+#' @param pointsize point size
+#' @param edgesize edge strength
+#' @param layout ggraph layout
+#' @param layout_args list of argments to pass to ggraph layout function
 #'
 #' @return a ggplot object
 #'
@@ -20,51 +25,82 @@
 #' @importFrom ggraph ggraph geom_edge_link geom_node_point geom_node_label
 #'
 #' @export
-plot_graph <- function(igraph, seed_genes, title = NULL, titlesize = 10) {
+plot_graph <- function(igraph,
+                       seed_genes, title = NULL, titlesize = 10,
+                       textsize = 3, pointsize = 1, edgesize = .5,
+                       layout   = "stress", layout_args = list()
+) {
+    tbl_components <- tibble::tibble(
+            gr = igraph::decompose(igraph)
+        ) %>%
+        mutate(
+            component = as.character(dplyr::row_number())
+        ) %>%
+        select(.data$component, dplyr::everything()) %>%
+        mutate(
+            name = purrr::map(.data$gr, ~igraph::get.vertex.attribute(., "name"))
+        ) %>%
+        select(-.data$gr) %>%
+        tidyr::unnest(.data$name)
 
     ggr <- as_tbl_graph(igraph)
     ggr <- left_join(
-        ggr,
-        ggr %>%
-            as_tibble() %>%
-            mutate(
-                external_gene_name = get_external_names(.data$name)
-            ) %>%
-            group_by(.data$name) %>%
-            summarise(
-                external_name = paste(unique(.data$external_gene_name), collapse = "|")
-            ) %>%
-            mutate(
-                external_name = ifelse(.data$external_name == "unknown", .data$name, .data$external_name)
-            ),
-        by = "name"
-    )
-    ggraph(ggr, layout = "stress") +
+            ggr,
+            ggr %>%
+                as_tibble() %>%
+                mutate(
+                    external_gene_name = get_external_names(.data$name)
+                ) %>%
+                group_by(.data$name) %>%
+                summarise(
+                    external_name = paste(unique(.data$external_gene_name), collapse = "|")
+                ) %>%
+                mutate(
+                    external_name = ifelse(.data$external_name == "unknown", .data$name, .data$external_name)
+                ),
+            by = "name"
+        ) %>%
+        left_join(tbl_components, by = "name") %>%
+        mutate(
+            is_seed = .data$name %in% seed_genes
+        )
+    do.call(ggraph, args = c(list(ggr), list(layout = layout), layout_args)) +
         geom_edge_link(
-            alpha = .05
+            alpha = .05,
+            edge_width = edgesize
         ) +
         geom_node_point(
-            ggplot2::aes(color = .data$name %in% seed_genes)
+            ggplot2::aes(
+                color = .data$component
+            ),
+            size = pointsize
         ) +
         geom_node_label(
             ggplot2::aes(
-                label = .data$external_name,
-                color = .data$name %in% seed_genes
+                label = ifelse(!.data$is_seed, .data$external_name, ""),
+                color = .data$component#.data$name %in% seed_genes
             ),
             repel         = TRUE,
-            label.padding = grid::unit(0.1, "lines"),
-            label.r       = grid::unit(0.1, "lines"),
+            label.padding = grid::unit(textsize * 0.033, "lines"),
+            label.r       = grid::unit(textsize * 0.033, "lines"),
             show.legend   = FALSE,
-            segment.size  = .2,
-            box.padding   = grid::unit(0.15, "lines")
+            segment.size  = textsize * 0.05,
+            box.padding   = grid::unit(textsize * 0.033, "lines"),
+            size          = textsize
         ) +
-        ggplot2::scale_color_manual(
-            "seed gene",
-            values = c(
-                "TRUE"  = scales::muted("green", l = 50, c = 70),
-                "FALSE" = "black"
-            )
+        geom_node_label(
+            ggplot2::aes(
+                label = ifelse(.data$is_seed, .data$external_name, "")
+            ),
+            repel         = TRUE,
+            label.padding = grid::unit(textsize * 0.033, "lines"),
+            label.r       = grid::unit(textsize * 0.033, "lines"),
+            show.legend   = FALSE,
+            segment.size  = textsize * 0.05,
+            box.padding   = grid::unit(textsize * 0.033, "lines"),
+            size          = textsize
         ) +
+        ggplot2::scale_colour_brewer(type = "qual", palette = 1) +
         {if (!is.null(title)) {ggplot2::ggtitle(label = title)} else {NULL}} +
         ggplot2::theme_bw() +
         ggplot2::theme(

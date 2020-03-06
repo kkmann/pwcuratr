@@ -5,18 +5,38 @@
 \alias{plot_pathway}
 \title{Plot a gene network graph}
 \usage{
-plot_graph(igraph, seed_genes, title = NULL, titlesize = 10)
+plot_graph(
+  igraph,
+  seed_genes,
+  title = NULL,
+  titlesize = 10,
+  textsize = 3,
+  pointsize = 1,
+  edgesize = 0.5,
+  layout = "stress",
+  layout_args = list()
+)
 
 plot_pathway(genes, seed_genes, minscore = 0, titlesize = 10, minnodes = 1)
 }
 \arguments{
 \item{igraph}{an igraph object as returned by \code{\link[=as_igraph]{as_igraph()}}}
 
-\item{seed_genes}{character vector of ensembl IDs of the seed genes in the igraph object}
+\item{seed_genes}{character vector of ENSEMBL IDs of the seed genes in the igraph object}
 
 \item{title}{plot title}
 
 \item{titlesize}{text size for the title}
+
+\item{textsize}{text size for labels}
+
+\item{pointsize}{point size}
+
+\item{edgesize}{edge strength}
+
+\item{layout}{ggraph layout}
+
+\item{layout_args}{list of argments to pass to ggraph layout function}
 
 \item{genes}{character vector of ensembl IDs of the genes in the network}
 

@@ -328,7 +328,8 @@ server <- function(input, output, session) {
             ggtitle("Number of retained candidate genes") +
             theme_bw() +
             theme(
-                panel.grid.minor = element_blank()
+                panel.grid.minor = element_blank(),
+                panel.grid       = element_blank()
             )
         p2 <- tibble(
             maxedgedistance = 0:10,
@@ -365,7 +366,8 @@ server <- function(input, output, session) {
             ggtitle("Number of connected components") +
             theme_bw() +
             theme(
-                panel.grid.minor = element_blank()
+                panel.grid.minor = element_blank(),
+                panel.grid       = element_blank()
             )
         cowplot::plot_grid(p1, p2, nrow = 1)
     }, height = 150)
@@ -386,16 +388,33 @@ server <- function(input, output, session) {
                 maxedgedistance = input$pruning_distance
             )
         }
-        n_components <- cdt_genes %>%
+        cpnts <- cdt_genes %>%
             as_igraph() %>%
-            igraph::components() %>%
-            .[["no"]]
-        selectInput("component_selector",
-            label    = "graph component",
-            choices  = as.character(1:n_components),
-            multiple = FALSE,
-            width    = "100%",
-            selected = "1"
+            igraph::components()
+        n_components <- cpnts$no
+
+        choice_labels <- enframe(cpnts$membership) %>%
+            filter(name %in% seed_genes_selected()) %>%
+            mutate(name = get_external_names(name)) %>%
+            distinct() %>%
+            group_by(value) %>%
+            summarize(
+                label = paste(name, collapse = ", ") %>%
+                    {
+                        if (nchar(.) > 30) {
+                            glue("{str_sub(., end = 30)}...")
+                        } else {
+                            .
+                        }
+                    }
+            ) %>%
+            pull(label)
+        choices        <- 1:n_components
+        names(choices) <- choice_labels
+        checkboxGroupInput("component_selector",
+            label    = "graph components to plot",
+            choices  = choices,
+            selected = choices
         )
     })
 
@@ -403,7 +422,7 @@ server <- function(input, output, session) {
         if (is.null(input$uploadPathwayZip$datapath[1])) {
             return(numericInput('pruning_distance',
                 label = 'k',
-                min = 0, max = NA, value = 1
+                min = 0, max = 10, value = 1, step = 1
             ))
         } else {
             tdir <- tempdir()
@@ -415,7 +434,7 @@ server <- function(input, output, session) {
             setwd(odir)
             return(numericInput('pruning_distance',
                 label = 'k',
-                min = 0, max = NA, value = pruning_distance
+                min = 0, max = 10, value = pruning_distance, step = 1
             ))
         }
     })
@@ -460,25 +479,44 @@ server <- function(input, output, session) {
         }
     })
 
-    output$plt_pathway <- renderPlot({
+    plot_pathway <- eventReactive(input$plot, {
         req(input$minScore, input$pruning_distance)
         if (is.null(input$component_selector)) return(NULL)
         withProgress({
-                candidate_genes(
-                    minscore        = input$minScore,
-                    maxedgedistance = input$pruning_distance
-                ) %>%
+            candidate_genes(
+                minscore        = input$minScore,
+                maxedgedistance = input$pruning_distance
+            ) %>%
                 as_igraph() %>%
                 igraph::decompose() %>%
-                .[[as.integer(input$component_selector)]] %>%
+                .[as.integer(input$component_selector)] %>%
+                {do.call(igraph::union, args = .)} %>%
                 plot_graph(
-                    seed_genes = tbls$seed_genes$ensembl_gene_id
+                    seed_genes = seed_genes_selected(),
+                    textsize    = input$plt_textsize,
+                    pointsize   = input$plt_pointsize,
+                    edgesize    = input$plt_edgesize,
+                    layout      = "stress",
+                    layout_args = list(bbox = input$plt_bbox)
                 )
-            }, value = 0, message = "plotting...")
+        }, value = 0, message = "plotting...")
+    })
+
+    output$plt_pathway <- renderPlot({
+            plot_pathway()
         },
         height = function() 72*input$plt_height,
         width  = function() if (is.na(input$plt_width)) "auto" else 72*input$plt_width,
         res    = 72
+    )
+
+    output$downloadPlot <- downloadHandler(
+        filename = function() glue("{input$pwcName}.pdf"),
+        content = function(file) {
+            tdir <- dirname(file)
+            plot_pathway()
+            ggplot2::ggsave(file, width = input$plt_width, height = input$plt_height)
+        }
     )
 
     output$download <- downloadHandler(
