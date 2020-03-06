@@ -1,3 +1,10 @@
+# pwcuratr 0.2.2
+
+* bug fixes
+* improved plotting
+
+
+
 # pwcuratr 0.2.0
 
 * improved documentation
